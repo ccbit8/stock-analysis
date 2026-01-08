@@ -1,7 +1,11 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
-const isDev = process.env.NODE_ENV === 'development';
-const { autoUpdater } = require('electron-updater');
+const isDev = !app.isPackaged; // 使用更可靠的方法判断开发环境
+// 只在生产环境加载 electron-updater
+let autoUpdater;
+if (!isDev) {
+  autoUpdater = require('electron-updater').autoUpdater;
+}
 
 // Keep a global reference of the window object
 let mainWindow;
@@ -29,7 +33,13 @@ function createWindow() {
     ? 'http://localhost:3000' 
     : `file://${path.join(__dirname, '../out/index.html')}`;
   
-  mainWindow.loadURL(startUrl);
+  console.log('Loading URL:', startUrl, '| isDev:', isDev);
+  
+  mainWindow.loadURL(startUrl).catch(err => {
+    console.error('Failed to load URL:', err);
+    // 如果加载失败，显示错误信息
+    dialog.showErrorBox('加载失败', `无法加载页面: ${err.message}\nURL: ${startUrl}`);
+  });
 
   // Show window when ready to prevent visual flash
   mainWindow.once('ready-to-show', () => {
@@ -64,7 +74,7 @@ app.whenReady().then(() => {
   });
 
   // Check for updates in production
-  if (!isDev) {
+  if (!isDev && autoUpdater) {
     autoUpdater.checkForUpdatesAndNotify();
   }
 });
@@ -102,7 +112,7 @@ ipcMain.handle('show-save-dialog', async (event, options) => {
 });
 
 // Handle app updates
-if (!isDev) {
+if (!isDev && autoUpdater) {
   autoUpdater.on('update-available', () => {
     dialog.showMessageBox(mainWindow, {
       type: 'info',

@@ -4,7 +4,7 @@
   "description": "Stock analysis tool with multiple algorithms",
   "author": "Stock Analysis Team",
   "private": true,
-  "main": "public/electron.js",
+  "main": "electron/main.js",
   "homepage": "./",
   "scripts": {
     "dev": "next dev",
@@ -13,7 +13,7 @@
     "lint": "next lint",
     "build-electron": "next build",
     "electron": "wait-on http://localhost:3000 && electron .",
-    "electron-dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron-dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 --timeout 60000 && electron .\"",
     "electron-pack": "electron-builder",
     "electron-pack-win": "electron-builder --win",
     "electron-pack-mac": "electron-builder --mac",
@@ -47,6 +47,7 @@
     "concurrently": "^9.2.1",
     "electron": "^38.2.2",
     "electron-builder": "^26.0.12",
+    "electron-updater": "^6.7.3",
     "eslint": "^8",
     "eslint-config-next": "15.5.4",
     "postcss": "^8",
@@ -75,7 +76,9 @@
       "target": [
         {
           "target": "zip",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ]
     },
